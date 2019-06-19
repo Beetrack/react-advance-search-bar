@@ -154,10 +154,12 @@ export default class AdvanceSearchBar extends React.Component {
   }
 
   triggerSearch () {
+    console.log('Callback', this.state.selectedOptions);
     this.props.callback(this.state.selectedOptions);
   }
 
   triggerEmptyState () {
+    console.log('Empty', this.state.selectedOptions);
     this.props.emptyCallback();
   }
 
