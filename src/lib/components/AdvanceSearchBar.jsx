@@ -78,6 +78,11 @@ export default class AdvanceSearchBar extends React.Component {
   }
 
   changeHelperDisplay (value) {
+    const checkInputOptions = this.getCurrentInputOptionList();
+    if (checkInputOptions.length === 0 && this.state.showHelper === false) {
+      this.triggerSearch();
+      return;
+    }
     this.setState({
       showHelper: value,
       searchIndexSelected: 0
@@ -138,6 +143,7 @@ export default class AdvanceSearchBar extends React.Component {
 
   handleClean () {
     this.setState({
+      focus: false,
       selectedOptions: {},
       searchInputValue: ''
     }, () => { this.triggerEmptyState(); });
@@ -169,6 +175,7 @@ export default class AdvanceSearchBar extends React.Component {
       inputs.push(
         <Input onInputChange={this.handleOptionTextChange}
           triggerInputEnd={this.triggerInputEnd}
+          triggerInputSearch={this.triggerSearch}
           inputOption={inputOption}
           value={value}
           key={key} />
@@ -183,6 +190,7 @@ export default class AdvanceSearchBar extends React.Component {
         selectedOption={this.state.searchIndexSelected}
         changeSearchIndexSelected={this.changeSearchIndexSelected}
         handleOptionDelete={this.handleOptionDelete}
+        triggerSearch={this.triggerSearch}
         changeHelperDisplay={this.changeHelperDisplay}
         refInput={this.setTextInputRef}
         key='search-bar-input-text'>
