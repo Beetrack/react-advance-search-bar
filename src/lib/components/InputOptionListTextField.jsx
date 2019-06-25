@@ -71,8 +71,7 @@ export default class InputOptionListTextField extends React.Component {
     event.preventDefault();
     event.stopPropagation();
     let options = getFilteredChildren(React.Children.toArray(this.props.children), this.props.value);
-    console.log(options);
-    if (options.length === 0) {
+    if (options.length === 0 && this.props.value.trim().length > 0) {
       this.props.changeHelperDisplay(true);
     } else {
       this.props.triggerSearch();
@@ -102,12 +101,12 @@ export default class InputOptionListTextField extends React.Component {
 
 InputOptionListTextField.propTypes = {
   focusChangeHandler: PropTypes.func.isRequired,
+  triggerSearch: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
   onOptionSelect: PropTypes.func.isRequired,
   changeSearchIndexSelected: PropTypes.func.isRequired,
   handleOptionDelete: PropTypes.func.isRequired,
   changeHelperDisplay: PropTypes.func.isRequired,
-  triggerSearch: PropTypes.func.isRequired,
   refInput: PropTypes.func.isRequired,
   value: PropTypes.string.isRequired,
   selectedOption: PropTypes.number,

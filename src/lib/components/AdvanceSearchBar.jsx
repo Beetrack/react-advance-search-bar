@@ -78,11 +78,6 @@ export default class AdvanceSearchBar extends React.Component {
   }
 
   changeHelperDisplay (value) {
-    const checkInputOptions = this.getCurrentInputOptionList();
-    if (checkInputOptions.length === 0 && this.state.showHelper === false) {
-      this.triggerSearch();
-      return;
-    }
     this.setState({
       showHelper: value,
       searchIndexSelected: 0
@@ -160,7 +155,13 @@ export default class AdvanceSearchBar extends React.Component {
   }
 
   triggerSearch () {
-    this.props.callback(this.state.selectedOptions);
+    const options = Object.values(this.state.selectedOptions);
+    if (options.length === 0) {
+      return;
+    }
+    if (options.every(value => value.trim().length > 0)) {
+      this.props.callback(this.state.selectedOptions);
+    }
   }
 
   triggerEmptyState () {
