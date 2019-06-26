@@ -39,6 +39,7 @@ export default class Input extends React.Component {
     if (event.key === 'Enter') {
       event.preventDefault();
       this.props.triggerInputEnd();
+      this.props.triggerSearch();
     } else if (event.key === 'Backspace') {
       if (this.props.value.length === 0) {
         this.props.triggerInputEnd();
@@ -108,6 +109,7 @@ export default class Input extends React.Component {
 Input.propTypes = {
   onInputChange: PropTypes.func.isRequired,
   triggerInputEnd: PropTypes.func.isRequired,
+  triggerSearch: PropTypes.func.isRequired,
   inputOption: PropTypes.instanceOf(Object).isRequired,
   options: PropTypes.array,
   value: PropTypes.string
