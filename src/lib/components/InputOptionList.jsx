@@ -8,14 +8,10 @@ const listElementHeight = 48;
 const listPadding = 16;
 
 const getFilteredChildren = (childrenArray, searchingKey) => {
-  let regex;
-  if (searchingKey) {
-    regex = new RegExp(searchingKey, 'i');
-  }
-
-  return childrenArray.filter((inputOption) => {
-    let text = getInputDisplayName(inputOption);
-    return !regex || regex.test(text);
+  const query = searchingKey.toLowerCase();
+  return childrenArray.filter(suggestion => {
+    const label = suggestion.props.label.toLowerCase();
+    return label.indexOf(query) > -1;
   });
 };
 
