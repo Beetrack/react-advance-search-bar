@@ -202,7 +202,6 @@ export default class AdvanceSearchBar extends React.Component {
       inputs.push(
         <Input onInputChange={this.handleOptionTextChange}
           triggerInputEnd={this.triggerInputEnd}
-          triggerInputSearch={this.triggerSearch}
           triggerSearch={this.triggerSearch}
           inputOption={inputOption}
           value={value}
