@@ -11,6 +11,7 @@ export default class InputOptionListTextField extends React.Component {
     this.onKeyPress = this.onKeyPress.bind(this);
     this.onArrowUp = this.onArrowUp.bind(this);
     this.onArrowDown = this.onArrowDown.bind(this);
+    this.onTab = this.onTab.bind(this);
     this.onEnter = this.onEnter.bind(this);
     this.onBackspace = this.onBackspace.bind(this);
   }
@@ -38,7 +39,7 @@ export default class InputOptionListTextField extends React.Component {
         this.onEnter(event);
         break;
       case 'Tab':
-        this.onEnter(event);
+        this.onTab(event);
         break;
       case 'Backspace':
         this.onBackspace();
@@ -55,15 +56,25 @@ export default class InputOptionListTextField extends React.Component {
     this.props.changeSearchIndexSelected(Math.min(options.length - 1, this.props.selectedOption + 1));
   }
 
-  onEnter (event) {
+  onTab (event) {
     event.preventDefault();
     event.stopPropagation();
     let options = getFilteredChildren(React.Children.toArray(this.props.children), this.props.value);
-
     if (options.length === 0) {
       this.props.changeHelperDisplay(true);
     } else {
       this.props.onOptionSelect(options[this.props.selectedOption]);
+    }
+  }
+
+  onEnter (event) {
+    event.preventDefault();
+    event.stopPropagation();
+    let options = getFilteredChildren(React.Children.toArray(this.props.children), this.props.value);
+    if (options.length === 0 && this.props.value.trim().length > 0) {
+      this.props.changeHelperDisplay(true);
+    } else {
+      this.props.triggerSearch();
     }
   }
 
@@ -90,6 +101,7 @@ export default class InputOptionListTextField extends React.Component {
 
 InputOptionListTextField.propTypes = {
   focusChangeHandler: PropTypes.func.isRequired,
+  triggerSearch: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
   onOptionSelect: PropTypes.func.isRequired,
   changeSearchIndexSelected: PropTypes.func.isRequired,

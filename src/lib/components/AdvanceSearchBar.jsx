@@ -13,6 +13,7 @@ export default class AdvanceSearchBar extends React.Component {
     this.getCurrentTags = this.getCurrentTags.bind(this);
     this.handleOptionSelect = this.handleOptionSelect.bind(this);
     this.getCurrentInputOptionList = this.getCurrentInputOptionList.bind(this);
+    this.setOnlyOption = this.setOnlyOption.bind(this);
     this.handleInputEnd = this.handleInputEnd.bind(this);
     this.isSearchValid = this.isSearchValid.bind(this);
     this.handleOptionTextChange = this.handleOptionTextChange.bind(this);
@@ -39,6 +40,23 @@ export default class AdvanceSearchBar extends React.Component {
       // Options
       selectedOptions: {}
     };
+  }
+
+  componentDidMount () {
+    this.setOnlyOption();
+  }
+
+  // function checking children and setup the only child here
+  setOnlyOption () {
+    const { children } = this.props;
+    if (React.Children.count(children) !== 1) return;
+    const { name } = children.props;
+    this.setState({
+      focus: true,
+      selectedOptions: {
+        [name]: ''
+      }
+    });
   }
 
   changeFocus (value) {
@@ -118,7 +136,7 @@ export default class AdvanceSearchBar extends React.Component {
     });
   }
 
-  handleInputEnd () {
+  cleanSelectedOptions (callback) {
     let selectedOptions = this.state.selectedOptions;
     for (let [key, value] of Object.entries(selectedOptions)) {
       if (!value) {
@@ -129,6 +147,12 @@ export default class AdvanceSearchBar extends React.Component {
     this.setState({
       selectedOptions: selectedOptions
     }, () => {
+      if (callback) callback();
+    });
+  }
+
+  handleInputEnd () {
+    this.cleanSelectedOptions(() => {
       const selectedOptions = Object.keys(this.state.selectedOptions);
       if (!selectedOptions.length) {
         this.triggerEmptyState();
@@ -138,6 +162,7 @@ export default class AdvanceSearchBar extends React.Component {
 
   handleClean () {
     this.setState({
+      focus: false,
       selectedOptions: {},
       searchInputValue: ''
     }, () => { this.triggerEmptyState(); });
@@ -154,7 +179,15 @@ export default class AdvanceSearchBar extends React.Component {
   }
 
   triggerSearch () {
-    this.props.callback(this.state.selectedOptions);
+    this.cleanSelectedOptions(() => {
+      const options = Object.values(this.state.selectedOptions);
+      if (options.length === 0) {
+        return;
+      }
+
+      this.props.callback(this.state.selectedOptions);
+      this.textInputRef.blur();
+    });
   }
 
   triggerEmptyState () {
@@ -169,6 +202,7 @@ export default class AdvanceSearchBar extends React.Component {
       inputs.push(
         <Input onInputChange={this.handleOptionTextChange}
           triggerInputEnd={this.triggerInputEnd}
+          triggerSearch={this.triggerSearch}
           inputOption={inputOption}
           value={value}
           key={key} />
@@ -183,6 +217,7 @@ export default class AdvanceSearchBar extends React.Component {
         selectedOption={this.state.searchIndexSelected}
         changeSearchIndexSelected={this.changeSearchIndexSelected}
         handleOptionDelete={this.handleOptionDelete}
+        triggerSearch={this.triggerSearch}
         changeHelperDisplay={this.changeHelperDisplay}
         refInput={this.setTextInputRef}
         key='search-bar-input-text'>
@@ -283,7 +318,7 @@ AdvanceSearchBar.propTypes = {
   helperTitleFunction: PropTypes.func,
   children: PropTypes.node.isRequired,
   labelText: PropTypes.string,
-  buttonText: PropTypes.string,
+  buttonText: PropTypes.node,
   notTagFound: PropTypes.string,
   helperTextButton: PropTypes.string
 };

@@ -95,9 +95,7 @@ export default class InputOptionListHelper extends React.Component {
   }
 
   onBackspace () {
-    if (this.props.value.length === 0) {
-      this.props.handleOptionDelete();
-    }
+    this.props.changeHelperDisplay();
   }
 
   componentDidMount () {
@@ -134,7 +132,6 @@ export default class InputOptionListHelper extends React.Component {
 }
 
 InputOptionListHelper.propTypes = {
-  handleOptionDelete: PropTypes.func.isRequired,
   handleOptionSelect: PropTypes.func.isRequired,
   changeHelperDisplay: PropTypes.func.isRequired,
   helperTitleFunction: PropTypes.func.isRequired,
