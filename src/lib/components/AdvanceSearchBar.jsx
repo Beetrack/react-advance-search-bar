@@ -12,7 +12,6 @@ export default class AdvanceSearchBar extends React.Component {
     super(props);
     this.getCurrentTags = this.getCurrentTags.bind(this);
     this.handleOptionSelect = this.handleOptionSelect.bind(this);
-    this.getCurrentInputOptionList = this.getCurrentInputOptionList.bind(this);
     this.setOnlyOption = this.setOnlyOption.bind(this);
     this.handleInputEnd = this.handleInputEnd.bind(this);
     this.isSearchValid = this.isSearchValid.bind(this);
@@ -109,8 +108,13 @@ export default class AdvanceSearchBar extends React.Component {
     if (!selectedOption) {
       return;
     }
+
     let selectedOptionsCopy = this.state.selectedOptions;
-    selectedOptionsCopy[selectedOption.props.name] = value || '';
+    if (selectedOptionsCopy[selectedOption.props.name]) {
+      selectedOptionsCopy[selectedOption.props.name] = selectedOptionsCopy[selectedOption.props.name].concat([value]);
+    } else {
+      selectedOptionsCopy[selectedOption.props.name] = [value] || '';
+    }
 
     this.setState({
       searchInputValue: '',
@@ -234,7 +238,7 @@ export default class AdvanceSearchBar extends React.Component {
     return inputs;
   }
 
-  getCurrentInputOptionList () {
+  getFilteredOptionsList = () => {
     let children = React.Children.toArray(this.props.children);
     let allValues = children.map(child => child.props.name);
     let selectedValues = Object.keys(this.state.selectedOptions);
@@ -245,8 +249,13 @@ export default class AdvanceSearchBar extends React.Component {
         allValues.splice(index, 1);
       }
     }
-
     return children.filter(child => allValues.indexOf(child.props.name) !== -1);
+  }
+
+  getOptionList = () => {
+    const { allowMulti } = this.props;
+    if (allowMulti) return React.Children.toArray(this.props.children);
+    return this.getFilteredOptionsList();
   }
 
   isSearchValid () {
@@ -268,7 +277,7 @@ export default class AdvanceSearchBar extends React.Component {
   render () {
     const searchValid = this.isSearchValid();
     const showHelper = this.showHelper();
-    let optionList = this.getCurrentInputOptionList();
+    let optionList = this.getOptionList();
     let list;
 
     if (this.state.showHelper) {
@@ -313,6 +322,7 @@ export default class AdvanceSearchBar extends React.Component {
 }
 
 AdvanceSearchBar.propTypes = {
+  allowMulti: PropTypes.bool.isRequired,
   callback: PropTypes.func.isRequired,
   emptyCallback: PropTypes.func,
   helperTitleFunction: PropTypes.func,
@@ -338,5 +348,6 @@ AdvanceSearchBar.defaultProps = {
       <p className='search-bar__modal-title'>What do you want to search?</p>
       <p className='search-bar__modal-subtitle'>You have written: <b>{word}</b>. Please enter the field in which you are looking for.</p>
     </div>
-  )
+  ),
+  allowMulti: false
 };
