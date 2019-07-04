@@ -79,3 +79,7 @@
 .input-tag__delete:hover svg path {
     fill: #333;
 }
+
+.input-tag__separator {
+  margin-right: 3px;
+}

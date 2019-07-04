@@ -61,7 +61,7 @@ export default class InputOptionListTextField extends React.Component {
     event.stopPropagation();
     let options = getFilteredChildren(React.Children.toArray(this.props.children), this.props.value);
     if (options.length === 0) {
-      this.props.changeHelperDisplay(true);
+      this.props.toggleHelper(true);
     } else {
       this.props.onOptionSelect(options[this.props.selectedOption]);
     }
@@ -72,7 +72,7 @@ export default class InputOptionListTextField extends React.Component {
     event.stopPropagation();
     let options = getFilteredChildren(React.Children.toArray(this.props.children), this.props.value);
     if (options.length === 0 && this.props.value.trim().length > 0) {
-      this.props.changeHelperDisplay(true);
+      this.props.toggleHelper(true);
     } else {
       this.props.triggerSearch();
     }
@@ -80,7 +80,7 @@ export default class InputOptionListTextField extends React.Component {
 
   onBackspace () {
     if (this.props.value.length === 0) {
-      this.props.handleOptionDelete();
+      this.props.deleteLastChip();
     }
   }
 
@@ -105,8 +105,8 @@ InputOptionListTextField.propTypes = {
   onChange: PropTypes.func.isRequired,
   onOptionSelect: PropTypes.func.isRequired,
   changeSearchIndexSelected: PropTypes.func.isRequired,
-  handleOptionDelete: PropTypes.func.isRequired,
-  changeHelperDisplay: PropTypes.func.isRequired,
+  deleteLastChip: PropTypes.func.isRequired,
+  toggleHelper: PropTypes.func.isRequired,
   refInput: PropTypes.func.isRequired,
   value: PropTypes.string.isRequired,
   selectedOption: PropTypes.number,

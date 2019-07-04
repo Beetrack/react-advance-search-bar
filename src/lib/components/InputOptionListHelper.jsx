@@ -25,7 +25,7 @@ export default class InputOptionListHelper extends React.Component {
 
     if (!optionSelect.props.options || suboption) {
       this.props.handleOptionSelect(optionSelect, (suboption && suboption.name) || this.props.value);
-      this.props.changeHelperDisplay(false);
+      this.props.toggleHelper(false);
     } else {
       this.setState({
         showInfoFor: optionSelect.props.options ? optionSelect.props.name : null
@@ -51,7 +51,7 @@ export default class InputOptionListHelper extends React.Component {
         this.onBackspace();
         break;
       case 'Escape':
-        this.props.changeHelperDisplay(false);
+        this.props.toggleHelper(false);
         break;
     }
   }
@@ -88,23 +88,18 @@ export default class InputOptionListHelper extends React.Component {
     let options = React.Children.toArray(this.props.children);
     if (this.props.selectedOption == null) return;
     if (options.length === 0) {
-      this.props.changeHelperDisplay(true);
+      this.props.toggleHelper(true);
     } else {
       this.handleOptionSelect(options[this.props.selectedOption]);
     }
   }
 
   onBackspace () {
-    this.props.changeHelperDisplay();
+    this.props.toggleHelper();
   }
 
   componentDidMount () {
     this.ref.focus();
-    window.addEventListener('keydown', this.onKeyPress);
-  }
-
-  componentWillUnmount () {
-    window.removeEventListener('keydown', this.onKeyPress);
   }
 
   render () {
@@ -113,8 +108,8 @@ export default class InputOptionListHelper extends React.Component {
     return (
       <div className='search-bar__input-options-list-helper'>
         <div className='search-bar__input-options-list-helper-backdrop'
-          onClick={() => this.props.changeHelperDisplay(false)} />
-        <div className='search-bar__input-options-list-helper-modal' tabIndex='0' ref={ref => { this.ref = ref; }}>
+          onClick={() => this.props.toggleHelper(false)} />
+        <div className='search-bar__input-options-list-helper-modal' tabIndex='0' ref={ref => { this.ref = ref; }} onKeyDown={this.onKeyPress}>
           <h3>{helperTitle}</h3>
           <InputOptionList onOptionSelect={this.handleOptionSelect}
             currentSearchingKey=''
@@ -124,7 +119,7 @@ export default class InputOptionListHelper extends React.Component {
             showInfoFor={this.state.showInfoFor}>
             { this.props.children }
           </InputOptionList>
-          <button onClick={() => this.props.changeHelperDisplay(false)}>{this.props.helperTextButton}</button>
+          <button onClick={() => this.props.toggleHelper(false)}>{this.props.helperTextButton}</button>
         </div>
       </div>
     );
@@ -133,7 +128,7 @@ export default class InputOptionListHelper extends React.Component {
 
 InputOptionListHelper.propTypes = {
   handleOptionSelect: PropTypes.func.isRequired,
-  changeHelperDisplay: PropTypes.func.isRequired,
+  toggleHelper: PropTypes.func.isRequired,
   helperTitleFunction: PropTypes.func.isRequired,
   changeSearchIndexSelected: PropTypes.func,
   selectedOption: PropTypes.number,
