@@ -52,7 +52,6 @@ export default class Input extends React.Component {
   onKeyPress (event, index) {
     if (event.key === 'Enter') {
       event.preventDefault();
-      console.log('onKeyPress Enter');
       this.props.triggerInputEnd();
       this.props.triggerSearch();
     } else if (event.key === 'Backspace') {
@@ -65,13 +64,11 @@ export default class Input extends React.Component {
     const allowMulti = inputOption.props.allowMulti;
 
     if (!allowMulti && this.props.value.length === 0) {
-      console.log('Backspace noMulti works just fine! triggerInputEnd');
       this.props.triggerInputEnd();
     }
 
     if (allowMulti && this.props.value[index].length === 0) {
       this.props.deleteOptionValueAt(inputOption.props.name, index);
-      console.log('Where to put the focus now?');
     }
   }
 
@@ -80,31 +77,56 @@ export default class Input extends React.Component {
   }
 
   getSelects () {
-    const suboptions = this.props.inputOption.props.options.map(opt => (
+    const { value, inputOption, separatorComponent } = this.props;
+    const values = inputOption.props.allowMulti ? value : [value];
+
+    const options = this.props.inputOption.props.options;
+    const suboptions = options.map(opt => (
       <option value={opt.name} key={opt.name}>
         {opt.label}
       </option>
     ));
 
-    return (
-      <select value={this.props.value}
-        onChange={(e) => this.onChange(e, 0)}
-        onKeyDown={this.onKeyPress}
-        ref={this.setTextInputRef.bind(this)}
-      >
-        {!this.props.value && <option value='' />}
-        {suboptions}
-      </select>
-    );
+    return values.map((value, index) => {
+      const isLast = index === values.length - 1;
+      const shouldRenderSeparator = index > 0;
+      const filteredSubOptions = suboptions.filter(option =>
+        option.props.value === value || values.indexOf(option.props.value) < 0
+      );
+
+      return (
+        <React.Fragment key={`input-${index}`}>
+          { shouldRenderSeparator && separatorComponent }
+          <select
+            value={value}
+            onChange={(e) => this.onChange(e, index)}
+            onKeyDown={this.onKeyPress}
+            ref={isLast ? this.setTextInputRef.bind(this) : null}
+          >
+            {!value && <option value='' />}
+            {filteredSubOptions}
+          </select>
+        </React.Fragment>
+      );
+    });
+  }
+
+  getValueWidth (value) {
+    const upperWidth = 0.90;
+    const lowerWith = 0.60;
+    if (value === value.toUpperCase()) {
+      return value.length * upperWidth;
+    } else {
+      return value.length * lowerWith;
+    }
   }
 
   getInputs () {
-    // What happens if theres only one option and its multi????
     const { value, inputOption, separatorComponent } = this.props;
     const values = inputOption.props.allowMulti ? value : [value];
 
     return values.map((value, index) => {
-      const size = Math.max(value.length, 1);
+      const width = value ? this.getValueWidth(value) : 0.5;
       const shouldRenderSeparator = index > 0;
       const isLast = index === values.length - 1;
 
@@ -112,9 +134,9 @@ export default class Input extends React.Component {
         <React.Fragment key={`input-${index}`}>
           { shouldRenderSeparator && separatorComponent }
           <input
+            style={{ width: `${width}em` }}
             type='text'
             value={value}
-            size={size}
             onChange={(e) => this.onChange(e, index)}
             onKeyDown={(e) => this.onKeyPress(e, index)}
             ref={isLast ? this.setTextInputRef.bind(this) : null}

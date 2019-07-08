@@ -53,11 +53,12 @@ export default class AdvanceSearchBar extends React.Component {
   setOnlyOption () {
     const { children } = this.props;
     if (React.Children.count(children) !== 1) return;
-    const { name } = children.props;
+    const { name, allowMulti } = children.props;
+
     this.setState({
       focus: true,
       selectedOptions: {
-        [name]: ['']
+        [name]: allowMulti ? [''] : ''
       }
     });
   }
@@ -105,7 +106,9 @@ export default class AdvanceSearchBar extends React.Component {
   }
 
   toggleHelper (value) {
-    console.log(this.props);
+    let optionList = this.getOptionList();
+    if (optionList.length === 0) return;
+    // Display only if there are options here!
     this.setState({
       showHelper: value,
       searchIndexSelected: 0
@@ -162,12 +165,12 @@ export default class AdvanceSearchBar extends React.Component {
   }
 
   getValidValue (value) {
-    if (typeof value === 'string' && value.length > 0) {
+    if (typeof value === 'string' && value.trim().length > 0) {
       return value;
     }
 
     if (Array.isArray(value)) {
-      const filteredValues = value.filter(val => val.length > 0);
+      const filteredValues = value.filter(val => val.trim().length > 0);
       return filteredValues.length > 0 ? filteredValues : null;
     }
 
@@ -301,14 +304,23 @@ export default class AdvanceSearchBar extends React.Component {
     return inputs;
   }
 
+  isAllSubOptionsSelected (child) {
+    const { selectedOptions } = this.state;
+    const { options, name } = child.props;
+
+    if (!options || !selectedOptions[name]) return false;
+
+    return selectedOptions[name].length === options.length;
+  }
+
   getOptionList = () => {
     const { selectedOptions } = this.state;
-    let children = React.Children.toArray(this.props.children); // TODO toArray is neccesary?
+    let children = React.Children.toArray(this.props.children);
 
     return children.filter(child => {
       const { allowMulti, name } = child.props;
 
-      return allowMulti || !selectedOptions[name];
+      return (allowMulti && !this.isAllSubOptionsSelected(child)) || !selectedOptions[name];
     });
   }
 

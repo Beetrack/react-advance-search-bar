@@ -44,6 +44,7 @@
 .input-tag__second input, .input-tag__second select {
   font-family: Roboto,sans-serif;
   font-size: .875rem;
+  text-align: center;
   background-color: #e0e0e0;
   border: none;
   margin-left: 0px;

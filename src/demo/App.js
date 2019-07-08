@@ -13,13 +13,14 @@ const SECOND_OPTIONS = [
   { name: 'fifth_suboption3', label: 'Suboption 3' }
 ];
 
+// You should pass allowMulti prop in order to make multiple values search!
 const App = () => (
   <div>
     <AdvanceSearchBar
       callback={(params) => { window.alert(`Searching parameters\n${Object.keys(params).reduce((memo, key) => { return memo + `${key}: ${params[key]}\n`; }, '')}`); }}
       emptyCallback={() => { console.log('Empty'); }}
     >
-      <InputOption name='first_option' label='First Option' options={FIRST_OPTIONS} />
+      <InputOption name='first_option' label='First Option' options={FIRST_OPTIONS} allowMulti />
       <InputOption name='second_option' label='Second Option' allowMulti />
       <InputOption name='third_option' label='Third Option' />
       <InputOption name='fourth_option' label='Fouth Option' />
