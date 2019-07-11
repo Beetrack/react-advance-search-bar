@@ -29,13 +29,6 @@ export default class Input extends React.Component {
     }
   }
 
-  // shouldComponentUpdate (prevProps) {
-  //   // TODO: compare value (string, array)
-
-  //   // return (prevProps.value !== this.props.value);
-  //   return true;
-  // }
-
   isValueEmpty (value) {
     return !value || value[0] === '';
   }
