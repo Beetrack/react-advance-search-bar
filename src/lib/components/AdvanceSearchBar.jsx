@@ -12,23 +12,26 @@ export default class AdvanceSearchBar extends React.Component {
     super(props);
     this.getCurrentTags = this.getCurrentTags.bind(this);
     this.handleOptionSelect = this.handleOptionSelect.bind(this);
-    this.getCurrentInputOptionList = this.getCurrentInputOptionList.bind(this);
     this.setOnlyOption = this.setOnlyOption.bind(this);
     this.handleInputEnd = this.handleInputEnd.bind(this);
     this.isSearchValid = this.isSearchValid.bind(this);
     this.handleOptionTextChange = this.handleOptionTextChange.bind(this);
     this.triggerInputEnd = this.triggerInputEnd.bind(this);
     this.changeFocus = this.changeFocus.bind(this);
-    this.handleInputTextChange = this.handleInputTextChange.bind(this);
+    this.handleSearchTextChange = this.handleSearchTextChange.bind(this);
     this.changeSearchIndexSelected = this.changeSearchIndexSelected.bind(this);
-    this.handleOptionDelete = this.handleOptionDelete.bind(this);
-    this.changeHelperDisplay = this.changeHelperDisplay.bind(this);
+    this.deleteLastChip = this.deleteLastChip.bind(this);
+    this.toggleHelper = this.toggleHelper.bind(this);
     this.triggerSearch = this.triggerSearch.bind(this);
     this.handleClean = this.handleClean.bind(this);
     this.setTextInputRef = this.setTextInputRef.bind(this);
     this.showHelper = this.showHelper.bind(this);
     this.handleSearchButton = this.handleSearchButton.bind(this);
+    this.deleteChip = this.deleteChip.bind(this);
+    this.deleteOptionValueAt = this.deleteOptionValueAt.bind(this);
+
     this.textInputRef = null;
+
     this.state = {
       focus: false,
       // Searching
@@ -50,11 +53,12 @@ export default class AdvanceSearchBar extends React.Component {
   setOnlyOption () {
     const { children } = this.props;
     if (React.Children.count(children) !== 1) return;
-    const { name } = children.props;
+    const { name, allowMulti } = children.props;
+
     this.setState({
       focus: true,
       selectedOptions: {
-        [name]: ''
+        [name]: allowMulti ? [''] : ''
       }
     });
   }
@@ -62,55 +66,72 @@ export default class AdvanceSearchBar extends React.Component {
   changeFocus (value) {
     let hasValue = !!this.state.searchInputValue;
     let hasOptions = Object.keys(this.state.selectedOptions).length > 0;
+
     this.setState({
       focus: (hasValue || hasOptions || value),
       isSearching: (hasValue || value)
     });
+
     if (value && hasOptions) {
       this.handleInputEnd();
     }
   }
 
-  handleInputTextChange (event) {
+  handleSearchTextChange (event) {
     this.setState({
       searchInputValue: event.target.value,
       searchIndexSelected: 0
     });
   }
 
-  handleOptionTextChange (value, inputOption) {
-    let selectedOptionsCopy = this.state.selectedOptions;
-    selectedOptionsCopy[inputOption.props.name] = value;
+  handleOptionTextChange (value, inputOption, index) {
+    const { allowMulti, name } = inputOption.props;
+    const selectedOptionsCopy = { ...this.state.selectedOptions };
+
+    if (allowMulti) {
+      selectedOptionsCopy[name][index] = value;
+    } else {
+      selectedOptionsCopy[name] = value;
+    }
 
     this.setState({
       selectedOptions: selectedOptionsCopy
     });
   }
 
-  changeSearchIndexSelected (value) {
-    if (this.state.value === value) return false;
-
+  changeSearchIndexSelected (index) {
     this.setState({
-      searchIndexSelected: value
+      searchIndexSelected: index
     });
   }
 
-  changeHelperDisplay (value) {
+  toggleHelper (value) {
+    let optionList = this.getOptionList();
+    if (optionList.length === 0) return;
+    // Display only if there are options here!
     this.setState({
       showHelper: value,
       searchIndexSelected: 0
     });
+
     if (!value) {
       setTimeout(() => { this.triggerInputEnd(); }, 200);
     }
   }
 
-  handleOptionSelect (selectedOption, value) {
-    if (!selectedOption) {
-      return;
+  handleOptionSelect (selectedOption, value = '') {
+    if (!selectedOption) return;
+
+    const { name, allowMulti } = selectedOption.props;
+    const selectedOptionsCopy = { ...this.state.selectedOptions };
+
+    if (selectedOptionsCopy[name]) {
+      const option = selectedOptionsCopy[name];
+      if (option[option.length - 1] === '') return;
+      selectedOptionsCopy[name] = selectedOptionsCopy[name].concat([value]);
+    } else {
+      selectedOptionsCopy[name] = allowMulti ? [value] : value;
     }
-    let selectedOptionsCopy = this.state.selectedOptions;
-    selectedOptionsCopy[selectedOption.props.name] = value || '';
 
     this.setState({
       searchInputValue: '',
@@ -119,33 +140,57 @@ export default class AdvanceSearchBar extends React.Component {
     });
   }
 
-  handleOptionDelete () {
-    let selectedOptions = this.state.selectedOptions;
-    let keys = Object.keys(selectedOptions);
-    if (keys.length === 0) {
-      return;
-    }
-    delete selectedOptions[keys[keys.length - 1]];
+  deleteLastChip () {
+    const keys = Object.keys(this.state.selectedOptions);
+    const lastKey = keys[keys.length - 1];
+
+    if (keys.length === 0) return;
+
+    this.deleteChip(lastKey);
+  }
+
+  deleteChip (option) {
+    const selectedOptions = { ...this.state.selectedOptions };
+    delete selectedOptions[option];
+
     this.setState({
-      selectedOptions: selectedOptions
+      selectedOptions
     }, () => {
       const selectedOptions = Object.keys(this.state.selectedOptions);
       if (!selectedOptions.length) {
         this.triggerEmptyState();
+        this.triggerInputEnd();
       }
     });
   }
 
-  cleanSelectedOptions (callback) {
-    let selectedOptions = this.state.selectedOptions;
-    for (let [key, value] of Object.entries(selectedOptions)) {
-      if (!value) {
-        delete selectedOptions[key];
-      }
+  getValidValue (value) {
+    if (typeof value === 'string' && value.trim().length > 0) {
+      return value;
     }
 
+    if (Array.isArray(value)) {
+      const filteredValues = value.filter(val => val.trim().length > 0);
+      return filteredValues.length > 0 ? filteredValues : null;
+    }
+
+    return null;
+  }
+
+  cleanSelectedOptions (callback) {
+    const { selectedOptions } = this.state;
+    const filteredOptions = {};
+
+    Object.keys(selectedOptions).forEach(key => {
+      let value = this.getValidValue(selectedOptions[key]);
+
+      if (value) {
+        filteredOptions[key] = value;
+      }
+    });
+
     this.setState({
-      selectedOptions: selectedOptions
+      selectedOptions: filteredOptions
     }, () => {
       if (callback) callback();
     });
@@ -165,7 +210,10 @@ export default class AdvanceSearchBar extends React.Component {
       focus: false,
       selectedOptions: {},
       searchInputValue: ''
-    }, () => { this.triggerEmptyState(); });
+    }, () => {
+      this.triggerEmptyState();
+      this.triggerInputEnd();
+    });
   }
 
   setTextInputRef (element) {
@@ -190,6 +238,25 @@ export default class AdvanceSearchBar extends React.Component {
     });
   }
 
+  deleteOptionValueAt (key, index) {
+    const optionValues = [...this.state.selectedOptions[key]];
+
+    optionValues.splice(index, 1);
+    this.triggerInputEnd();
+
+    if (optionValues.length === 0) {
+      this.deleteChip(key);
+      return;
+    }
+
+    this.setState({
+      selectedOptions: {
+        ...this.state.selectedOptions,
+        [key]: optionValues
+      }
+    });
+  }
+
   triggerEmptyState () {
     this.props.emptyCallback();
   }
@@ -203,6 +270,9 @@ export default class AdvanceSearchBar extends React.Component {
         <Input onInputChange={this.handleOptionTextChange}
           triggerInputEnd={this.triggerInputEnd}
           triggerSearch={this.triggerSearch}
+          deleteChip={this.deleteChip}
+          separatorComponent={this.props.separatorComponent}
+          deleteOptionValueAt={this.deleteOptionValueAt}
           inputOption={inputOption}
           value={value}
           key={key} />
@@ -212,13 +282,13 @@ export default class AdvanceSearchBar extends React.Component {
       <InputOptionListTextField focusChangeHandler={this.changeFocus}
         value={this.state.searchInputValue}
         disabled={this.state.showHelper}
-        onChange={this.handleInputTextChange}
+        onChange={this.handleSearchTextChange}
         onOptionSelect={this.handleOptionSelect}
         selectedOption={this.state.searchIndexSelected}
         changeSearchIndexSelected={this.changeSearchIndexSelected}
-        handleOptionDelete={this.handleOptionDelete}
+        deleteLastChip={this.deleteLastChip}
         triggerSearch={this.triggerSearch}
-        changeHelperDisplay={this.changeHelperDisplay}
+        toggleHelper={this.toggleHelper}
         refInput={this.setTextInputRef}
         key='search-bar-input-text'>
         { optionList }
@@ -234,19 +304,24 @@ export default class AdvanceSearchBar extends React.Component {
     return inputs;
   }
 
-  getCurrentInputOptionList () {
+  isAllSubOptionsSelected (child) {
+    const { selectedOptions } = this.state;
+    const { options, name } = child.props;
+
+    if (!options || !selectedOptions[name]) return false;
+
+    return selectedOptions[name].length === options.length;
+  }
+
+  getOptionList = () => {
+    const { selectedOptions } = this.state;
     let children = React.Children.toArray(this.props.children);
-    let allValues = children.map(child => child.props.name);
-    let selectedValues = Object.keys(this.state.selectedOptions);
 
-    for (let i = 0; i < selectedValues.length; i++) {
-      let index;
-      while ((index = allValues.indexOf(selectedValues[i])) !== -1) {
-        allValues.splice(index, 1);
-      }
-    }
+    return children.filter(child => {
+      const { allowMulti, name } = child.props;
 
-    return children.filter(child => allValues.indexOf(child.props.name) !== -1);
+      return (allowMulti && !this.isAllSubOptionsSelected(child)) || !selectedOptions[name];
+    });
   }
 
   isSearchValid () {
@@ -259,7 +334,7 @@ export default class AdvanceSearchBar extends React.Component {
 
   handleSearchButton (showHeper) {
     if (showHeper) {
-      this.changeHelperDisplay(true);
+      this.toggleHelper(true);
     } else {
       this.triggerSearch();
     }
@@ -268,13 +343,13 @@ export default class AdvanceSearchBar extends React.Component {
   render () {
     const searchValid = this.isSearchValid();
     const showHelper = this.showHelper();
-    let optionList = this.getCurrentInputOptionList();
+    let optionList = this.getOptionList();
     let list;
 
     if (this.state.showHelper) {
       list = <InputOptionListHelper handleOptionSelect={this.handleOptionSelect}
         changeSearchIndexSelected={this.changeSearchIndexSelected}
-        changeHelperDisplay={this.changeHelperDisplay}
+        toggleHelper={this.toggleHelper}
         value={this.state.searchInputValue}
         selectedOption={this.state.searchIndexSelected}
         helperTitleFunction={this.props.helperTitleFunction}
@@ -320,7 +395,8 @@ AdvanceSearchBar.propTypes = {
   labelText: PropTypes.string,
   buttonText: PropTypes.node,
   notTagFound: PropTypes.string,
-  helperTextButton: PropTypes.string
+  helperTextButton: PropTypes.string,
+  separatorComponent: PropTypes.node
 };
 
 AdvanceSearchBar.defaultProps = {
@@ -338,5 +414,7 @@ AdvanceSearchBar.defaultProps = {
       <p className='search-bar__modal-title'>What do you want to search?</p>
       <p className='search-bar__modal-subtitle'>You have written: <b>{word}</b>. Please enter the field in which you are looking for.</p>
     </div>
-  )
+  ),
+  allowMulti: false,
+  separatorComponent: (<span className='input-tag__separator'>|</span>)
 };
