@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { getInputDisplayName } from './InputOption.jsx';
 import DeleteIcon from './DeleteIcon.jsx';
 import './Input.css';
 
@@ -24,7 +23,7 @@ export default class Input extends React.Component {
     const { value } = this.props;
     const { inputOption } = this.props;
 
-    if (inputOption.props.allowMulti && value[value.length - 1] === '' && (prevProps.value.length < value.length)) {
+    if (inputOption.allowMulti && value[value.length - 1] === '' && (prevProps.value.length < value.length)) {
       this.triggerInputStart();
     }
   }
@@ -39,29 +38,34 @@ export default class Input extends React.Component {
 
   triggerDelete (e) {
     const { inputOption } = this.props;
-    this.props.deleteChip(inputOption.props.name);
+    this.props.deleteChip(inputOption.name);
   }
 
   onKeyPress (event, index) {
     if (event.key === 'Enter') {
       event.preventDefault();
+      // finaliza el ingreso del input
       this.props.triggerInputEnd();
+      // realiza la busqueda
+      // - opcional: podría solamente finalizar el input y dejar la responsabilidad del search para el botón
       this.props.triggerSearch();
     } else if (event.key === 'Backspace') {
+      // elimina la ultima seleccion en caso de ser multi
+      // si no es multi, elimina el option
       this.handleBackspace(index);
     }
   }
 
   handleBackspace (index) {
     const { inputOption } = this.props;
-    const allowMulti = inputOption.props.allowMulti;
+    const allowMulti = inputOption.allowMulti;
 
     if (!allowMulti && this.props.value.length === 0) {
       this.props.triggerInputEnd();
     }
 
     if (allowMulti && this.props.value[index].length === 0) {
-      this.props.deleteOptionValueAt(inputOption.props.name, index);
+      this.props.deleteOptionValueAt(inputOption.name, index);
     }
   }
 
@@ -71,9 +75,9 @@ export default class Input extends React.Component {
 
   getSelects () {
     const { value, inputOption, separatorComponent } = this.props;
-    const values = inputOption.props.allowMulti ? value : [value];
+    const values = inputOption.allowMulti ? value : [value];
 
-    const options = this.props.inputOption.props.options;
+    const options = this.props.inputOption.options;
     const suboptions = options.map(opt => (
       <option value={opt.name} key={opt.name}>
         {opt.label}
@@ -116,7 +120,7 @@ export default class Input extends React.Component {
 
   getInputs () {
     const { value, inputOption, separatorComponent } = this.props;
-    const values = inputOption.props.allowMulti ? value : [value];
+    const values = inputOption.allowMulti ? value : [value];
 
     return values.map((value, index) => {
       const width = value ? this.getValueWidth(value) : 0.5;
@@ -133,7 +137,7 @@ export default class Input extends React.Component {
             onChange={(e) => this.onChange(e, index)}
             onKeyDown={(e) => this.onKeyPress(e, index)}
             ref={isLast ? this.setTextInputRef.bind(this) : null}
-            key={`${inputOption.props.name}-${index}`}
+            key={`${inputOption.name}-${index}`}
           />
         </React.Fragment>
       );
@@ -147,12 +151,12 @@ export default class Input extends React.Component {
   }
 
   render () {
-    const isSelect = this.props.inputOption.props.options && this.props.inputOption.props.options.length >= 1;
+    const isSelect = this.props.inputOption.options && this.props.inputOption.options.length >= 1;
 
     return (
       <div className='search-bar__input-tag'>
         <span className='input-tag__start'>
-          { getInputDisplayName(this.props.inputOption) }
+          { this.props.inputOption.label }
         </span>
         <span className='input-tag__second'>
           { isSelect ? this.getSelects() : this.getInputs() }

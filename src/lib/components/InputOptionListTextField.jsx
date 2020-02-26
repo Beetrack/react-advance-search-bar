@@ -52,14 +52,14 @@ export default class InputOptionListTextField extends React.Component {
   }
 
   onArrowDown () {
-    let options = getFilteredChildren(React.Children.toArray(this.props.children), this.props.value);
+    let options = getFilteredChildren(this.props.options, this.props.value);
     this.props.changeSearchIndexSelected(Math.min(options.length - 1, this.props.selectedOption + 1));
   }
 
   onTab (event) {
     event.preventDefault();
     event.stopPropagation();
-    let options = getFilteredChildren(React.Children.toArray(this.props.children), this.props.value);
+    let options = getFilteredChildren(this.props.options, this.props.value);
     if (options.length === 0) {
       this.props.toggleHelper(true);
     } else {
@@ -70,7 +70,8 @@ export default class InputOptionListTextField extends React.Component {
   onEnter (event) {
     event.preventDefault();
     event.stopPropagation();
-    let options = getFilteredChildren(React.Children.toArray(this.props.children), this.props.value);
+
+    let options = getFilteredChildren(this.props.options, this.props.value);
     if (options.length === 0 && this.props.value.trim().length > 0) {
       this.props.toggleHelper(true);
     } else {

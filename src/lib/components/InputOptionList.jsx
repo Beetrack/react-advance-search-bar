@@ -1,16 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { getInputDisplayName } from './InputOption.jsx';
 import './InputOptionList.css';
 
 const minShowingElements = 3;
 const listElementHeight = 48;
 const listPadding = 16;
 
-const getFilteredChildren = (childrenArray, searchingKey) => {
+const getFilteredChildren = (optionsArray, searchingKey) => {
   const query = searchingKey.toLowerCase();
-  return childrenArray.filter(suggestion => {
-    const label = suggestion.props.label.toLowerCase();
+  return optionsArray.filter(suggestion => {
+    const label = suggestion.label.toLowerCase();
     return label.indexOf(query) > -1;
   });
 };
@@ -25,9 +24,9 @@ export default class InputOptionList extends React.Component {
     this.divRef = null;
   }
 
-  onClickOption (inputOption, event) {
+  onClickOption (option, event) {
     event.preventDefault();
-    this.props.onOptionSelect(inputOption);
+    this.props.onOptionSelect(option);
   }
 
   onHover (index) {
@@ -64,34 +63,39 @@ export default class InputOptionList extends React.Component {
   }
 
   renderSuboptions (inputOption) {
-    const suboptions = inputOption.props.options.map(option => option.label || option.name).join(', ');
+    const suboptions = inputOption.options.map(option => option.label || option.name).join(', ');
     return (
       <span className='input-options-list__suboptions'>| Valid Values: {suboptions}</span>
     );
   }
 
+  // hacer render en base a un array
   renderOptions () {
-    let options = getFilteredChildren(React.Children.toArray(this.props.children), this.props.currentSearchingKey);
-    options = options.map((inputOption, i) => {
-      const text = getInputDisplayName(inputOption);
-      const showSuboptions = this.props.showInfoFor === inputOption.props.name && inputOption.props.options;
+    const { optionList } = this.props
+
+    const newOptions = optionList.map((option, i) => {
+      const { label, options } = option;
+      const text = label;
+      const showSuboptions = this.props.showInfoFor === option.name && options;
 
       return (
-        <li onMouseDown={(e) => { this.onClickOption(inputOption, e); }}
+        <li
+          key={label}
           onMouseEnter={() => this.onHover(i)}
+          onMouseDown={(e) => { this.onClickOption(option, e); }}
           className={`${this.props.selectedOption === i ? 'search-bar__input-options-list-li--active' : ''}`}
-          key={inputOption.props.name}>
-          { text } {showSuboptions && this.renderSuboptions(inputOption)}
+        >
+          { text } {showSuboptions && this.renderSuboptions(option)}
         </li>
       );
     });
 
-    if (options.length === 0) {
-      options.push(
+    if (newOptions.length === 0) {
+      newOptions.push(
         <li key='no_tag'>{this.props.notTagFound}</li>
       );
     }
-    return options;
+    return newOptions;
   }
 
   render () {
