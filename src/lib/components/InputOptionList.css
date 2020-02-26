@@ -2,7 +2,6 @@
   z-index: 4;
   color: #000;
   overflow: auto;
-  background-color: white;
   border-radius: 0 0 4px 4px;
 }
 
@@ -18,9 +17,8 @@
   line-height: 1.5rem;
   list-style-type: none;
   text-transform: inherit;
-  letter-spacing: .00937em;
   text-decoration: inherit;
-  font-family: Roboto,sans-serif;
+  font-family: Roboto, sans-serif;
   -moz-osx-font-smoothing: grayscale;
 }
 

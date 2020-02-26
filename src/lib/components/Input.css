@@ -7,11 +7,11 @@
 }
 
 .search-bar__input-tag > * {
+  height: 25px;
   outline: none;
   display: flex;
-  overflow: hidden;
-  height: 25px;
   font-size: 12px;
+  overflow: hidden;
   position: relative;
   align-items: center;
   box-sizing: border-box;
@@ -30,7 +30,7 @@
 
 .search-bar__input-tag .input-tag__second {
   padding-right: 12px;
-  background-color: #fff;
+  background-color: transparent;
   border-top-right-radius: 16px;
   border-bottom-right-radius: 16px;
   color: var(--search-bar-active-color);
@@ -40,10 +40,11 @@
 .input-tag__second input, .input-tag__second select {
   border: none;
   cursor: pointer;
-  margin-left: 0px;
   font-size: 12px;
+  margin-left: 0px;
   text-align: center;
-  background-color: #fff;
+  padding: 0 5px;
+  background-color: transparent;
   font-family: Roboto, sans-serif;
   color: var(--search-bar-active-color);
 }

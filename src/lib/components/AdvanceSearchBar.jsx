@@ -29,6 +29,7 @@ export default class AdvanceSearchBar extends React.Component {
     this.handleSearchButton = this.handleSearchButton.bind(this);
     this.deleteChip = this.deleteChip.bind(this);
     this.deleteOptionValueAt = this.deleteOptionValueAt.bind(this);
+    this.renderLabel = this.renderLabel.bind(this);
 
     this.textInputRef = null;
 
@@ -104,7 +105,7 @@ export default class AdvanceSearchBar extends React.Component {
       searchIndexSelected: index
     });
   }
- 
+
   toggleHelper (value) {
     let optionList = this.getOptionList();
     if (optionList.length === 0) return;
@@ -280,7 +281,7 @@ export default class AdvanceSearchBar extends React.Component {
     }
     inputs.push(
       <InputOptionListTextField
-        options={optionList}
+        optionList={optionList}
         key='search-bar-input-text'
         refInput={this.setTextInputRef}
         disabled={this.state.showHelper}
@@ -341,17 +342,22 @@ export default class AdvanceSearchBar extends React.Component {
     }
   }
 
+  renderLabel () {
+    const { labelText } = this.props;
+
+    return labelText &&
+    <label className={`search-bar__label ${this.state.focus ? 'search-bar__label--float' : ''}`}>
+      {this.props.labelText}
+    </label>;
+  }
+
   render () {
+    const { dark } = this.props;
     const searchValid = this.isSearchValid();
     const showHelper = this.showHelper();
     let optionList = this.getOptionList();
-    let list = <InputOptionList onOptionSelect={this.handleOptionSelect}
-    currentSearchingKey={this.state.searchInputValue}
-    changeSearchIndexSelected={this.changeSearchIndexSelected}
-    selectedOption={this.state.searchIndexSelected}
-    notTagFound={this.props.notTagFound}
-    optionList={optionList}
-  />;
+    const currentTags = this.getCurrentTags(optionList);
+    let list;
 
     if (this.state.showHelper) {
       list = <InputOptionListHelper
@@ -374,9 +380,9 @@ export default class AdvanceSearchBar extends React.Component {
       />;
     }
     return (
-      <div className='search-bar'>
+      <div className={`search-bar${dark ? ' search-bar--dark' : ''}`}>
         <div className={`search-bar__container ${this.state.focus ? 'search-bar__container--focus' : ''}`}>
-          { this.getCurrentTags(optionList) }
+          { currentTags }
           <button
             className={`search-bar__button ${searchValid || showHelper ? 'search-bar__button--active' : ''} ${this.state.focus ? 'search-bar__button--active-border' : ''}`}
             disabled={!searchValid && !showHelper}
@@ -384,9 +390,7 @@ export default class AdvanceSearchBar extends React.Component {
           >
             {this.props.buttonText}
           </button>
-
-          { this.props.labelText && <label className={`search-bar__label ${this.state.focus ? 'search-bar__label--float' : ''}`}>{this.props.labelText}</label> }
-
+          { currentTags.length <= 1 && this.renderLabel() }
         </div>
         { list }
       </div>
@@ -395,17 +399,20 @@ export default class AdvanceSearchBar extends React.Component {
 }
 
 AdvanceSearchBar.propTypes = {
-  callback: PropTypes.func.isRequired,
-  emptyCallback: PropTypes.func,
-  helperTitleFunction: PropTypes.func,
-  labelText: PropTypes.string,
+  dark: PropTypes.bool,
+  options: PropTypes.array,
   buttonText: PropTypes.node,
+  labelText: PropTypes.string,
+  emptyCallback: PropTypes.func,
   notTagFound: PropTypes.string,
   helperTextButton: PropTypes.string,
-  separatorComponent: PropTypes.node
+  separatorComponent: PropTypes.node,
+  callback: PropTypes.func.isRequired,
+  helperTitleFunction: PropTypes.func
 };
 
 AdvanceSearchBar.defaultProps = {
+  dar: false,
   buttonText: (
     <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>
       <path d='M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z' />

@@ -134,5 +134,5 @@ InputOptionListHelper.propTypes = {
   selectedOption: PropTypes.number,
   helperTextButton: PropTypes.string,
   value: PropTypes.string,
-  children: PropTypes.node
+  optionList: PropTypes.array
 };

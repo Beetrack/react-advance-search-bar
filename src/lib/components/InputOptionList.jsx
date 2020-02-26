@@ -69,9 +69,8 @@ export default class InputOptionList extends React.Component {
     );
   }
 
-  // hacer render en base a un array
   renderOptions () {
-    const { optionList } = this.props
+    const { optionList } = this.props;
 
     const newOptions = optionList.map((option, i) => {
       const { label, options } = option;
@@ -122,7 +121,8 @@ InputOptionList.propTypes = {
   positionAbsolute: PropTypes.bool,
   notTagFound: PropTypes.string,
   children: PropTypes.node,
-  showInfoFor: PropTypes.string
+  showInfoFor: PropTypes.string,
+  optionList: PropTypes.array.isRequired
 };
 
 InputOptionList.defaultProps = {

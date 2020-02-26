@@ -31,6 +31,14 @@
   height: calc(var(--search-bar-height));
 }
 
+.search-bar__container > .search-bar__input-tag {
+  margin-right: 10px;
+}
+
+.search-bar__container > .search-bar__input-tag:last-child {
+  margin-right: 0;
+}
+
 .search-bar__label {
   top: var(--search-bar-half-height);
   left: 24px;
@@ -110,7 +118,7 @@
 }
 
 .search-bar__clean:hover svg path {
-    fill: #333;
+  fill: #333;
 }
 
 .helper-title {
@@ -123,4 +131,28 @@
   color: #000;
   font-size: 1em;
   font-weight: bold;
+}
+
+.search-bar--dark {
+  background-color: #323434;
+}
+.search-bar--dark .input-tag__delete svg path {
+  fill: #323434;
+}
+.search-bar--dark .search-bar__clean:hover svg path {
+  fill: #9c9c9c;
+}
+.search-bar--dark .search-bar__button:not(.search-bar__button--active ) {
+  fill: rgba(255, 255, 255, .38);
+}
+.search-bar--dark .search-bar__input-options-list li,
+.search-bar--dark .search-bar__input-options-list-text-field {
+  color: #9c9c9c;
+}
+.search-bar--dark .search-bar__input-options-list li.search-bar__input-options-list-li--active {
+  color: #ffffee;
+  background-color: rgba(255, 255, 255, 0.04);
+}
+.search-bar--dark .search-bar__input-tag .input-tag__second {
+  color: #fff;
 }
