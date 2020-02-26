@@ -21,14 +21,14 @@ export default class InputOptionListHelper extends React.Component {
   }
 
   handleOptionSelect (optionSelect) {
-    const suboption = optionSelect.props.options && optionSelect.props.options.find(option => option.label === this.props.value);
+    const suboption = optionSelect.options && optionSelect.options.find(option => option.label === this.props.value);
 
-    if (!optionSelect.props.options || suboption) {
+    if (!optionSelect.options || suboption) {
       this.props.handleOptionSelect(optionSelect, (suboption && suboption.name) || this.props.value);
       this.props.toggleHelper(false);
     } else {
       this.setState({
-        showInfoFor: optionSelect.props.options ? optionSelect.props.name : null
+        showInfoFor: optionSelect.options ? optionSelect.name : null
       });
     }
   }
@@ -77,7 +77,7 @@ export default class InputOptionListHelper extends React.Component {
   }
 
   onArrowDown () {
-    const children = React.Children.toArray(this.props.children);
+    const children = this.props.optionList;
     const value = Math.min(children.length - 1, this.props.selectedOption + 1);
     this.redraw(value);
     this.props.changeSearchIndexSelected(value);
@@ -85,7 +85,7 @@ export default class InputOptionListHelper extends React.Component {
 
   onEnter (event) {
     event.preventDefault();
-    let options = React.Children.toArray(this.props.children);
+    let options = this.props.optionList;
     if (this.props.selectedOption == null) return;
     if (options.length === 0) {
       this.props.toggleHelper(true);
@@ -116,9 +116,9 @@ export default class InputOptionListHelper extends React.Component {
             changeSearchIndexSelected={this.props.changeSearchIndexSelected}
             selectedOption={this.props.selectedOption}
             positionAbsolute={false}
-            showInfoFor={this.state.showInfoFor}>
-            { this.props.children }
-          </InputOptionList>
+            showInfoFor={this.state.showInfoFor}
+            optionList={this.props.optionList}
+          />
           <button onClick={() => this.props.toggleHelper(false)}>{this.props.helperTextButton}</button>
         </div>
       </div>
@@ -134,5 +134,5 @@ InputOptionListHelper.propTypes = {
   selectedOption: PropTypes.number,
   helperTextButton: PropTypes.string,
   value: PropTypes.string,
-  children: PropTypes.node
+  optionList: PropTypes.array
 };

@@ -1,54 +1,52 @@
 .search-bar__input-tag {
-  display: -ms-inline-flexbox;
-  display: inline-flex;
+  z-index: 1;
   font-weight: 100;
   align-items: center;
+  display: inline-flex;
+  display: -ms-inline-flexbox;
 }
 
 .search-bar__input-tag > * {
-  font-family: Roboto,sans-serif;
-  font-size: .875rem;
-  line-height: 1.25rem;
-  text-decoration: inherit;
-  text-transform: inherit;
-  position: relative;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
-  padding: 7px 12px;
+  height: 25px;
   outline: none;
-  overflow: hidden;
-  min-height: 25px;
-  max-height: calc(var(--search-bar-height) - 15px);
   display: flex;
+  font-size: 12px;
+  overflow: hidden;
+  position: relative;
   align-items: center;
+  box-sizing: border-box;
   justify-content: center;
+  font-family: Roboto, sans-serif;
 }
 
 .search-bar__input-tag .input-tag__start {
-  border-bottom-left-radius: 16px;
-  border-top-left-radius: 16px;
-  margin-left: 10px;
-  background-color: var(--search-bar-active-color);
-  color: #fff;
+  padding: 0 12px;
   font-weight: bolder;
+  color: rgba(0,0,0,0.52);
+  border-top-left-radius: 16px;
+  border-bottom-left-radius: 16px;
+  background-color: var(--search-bar-active-color);
 }
 
 .search-bar__input-tag .input-tag__second {
-  border-bottom-right-radius: 16px;
+  padding-right: 12px;
+  background-color: transparent;
   border-top-right-radius: 16px;
-  background-color: #e0e0e0;
+  border-bottom-right-radius: 16px;
+  color: var(--search-bar-active-color);
+  border: 1px solid var(--search-bar-active-color);
 }
 
 .input-tag__second input, .input-tag__second select {
-  font-family: Roboto,sans-serif;
-  font-size: .875rem;
-  text-align: center;
-  background-color: #e0e0e0;
   border: none;
-  margin-left: 0px;
   cursor: pointer;
+  font-size: 12px;
+  margin-left: 0px;
+  text-align: center;
+  padding: 0 5px;
+  background-color: transparent;
+  font-family: Roboto, sans-serif;
+  color: var(--search-bar-active-color);
 }
 
 .input-tag__second input:focus, .input-tag__second select:focus {
@@ -56,29 +54,29 @@
 }
 
 .input-tag__delete {
-  text-align: center;
-  display: inline-block;
-  background: #bbb;
   width: 18px;
   height: 18px;
-  border-radius: 50%;
   cursor: pointer;
-  text-decoration: inherit;
+  text-align: center;
+  border-radius: 50%;
+  display: inline-block;
   text-transform: inherit;
+  text-decoration: inherit;
+  background: var(--search-bar-active-color);
 }
 
 .input-tag__delete svg {
-  height: 14px;
+  top: 0;
+  height: 100%;
   position: relative;
-  top: 1px;
 }
 
 .input-tag__delete svg path {
-  fill: #777;
+  fill: #fff;
 }
 
-.input-tag__delete:hover svg path {
-    fill: #333;
+.input-tag__delete:hover {
+  opacity: 0.5;
 }
 
 .input-tag__separator {

@@ -29,6 +29,7 @@ export default class AdvanceSearchBar extends React.Component {
     this.handleSearchButton = this.handleSearchButton.bind(this);
     this.deleteChip = this.deleteChip.bind(this);
     this.deleteOptionValueAt = this.deleteOptionValueAt.bind(this);
+    this.renderLabel = this.renderLabel.bind(this);
 
     this.textInputRef = null;
 
@@ -51,9 +52,9 @@ export default class AdvanceSearchBar extends React.Component {
 
   // function checking children and setup the only child here
   setOnlyOption () {
-    const { children } = this.props;
-    if (React.Children.count(children) !== 1) return;
-    const { name, allowMulti } = children.props;
+    const { options } = this.props;
+    if (options !== 1) return;
+    const { name, allowMulti } = options;
 
     this.setState({
       focus: true,
@@ -85,7 +86,7 @@ export default class AdvanceSearchBar extends React.Component {
   }
 
   handleOptionTextChange (value, inputOption, index) {
-    const { allowMulti, name } = inputOption.props;
+    const { allowMulti, name } = inputOption;
     const selectedOptionsCopy = { ...this.state.selectedOptions };
 
     if (allowMulti) {
@@ -122,7 +123,7 @@ export default class AdvanceSearchBar extends React.Component {
   handleOptionSelect (selectedOption, value = '') {
     if (!selectedOption) return;
 
-    const { name, allowMulti } = selectedOption.props;
+    const { name, allowMulti } = selectedOption;
     const selectedOptionsCopy = { ...this.state.selectedOptions };
 
     if (selectedOptionsCopy[name]) {
@@ -265,7 +266,7 @@ export default class AdvanceSearchBar extends React.Component {
     let inputs = [];
 
     for (let [key, value] of Object.entries(this.state.selectedOptions)) {
-      let inputOption = React.Children.toArray(this.props.children).find(({ props }) => props.name === key);
+      let inputOption = this.props.options.find(({ name }) => name === key);
       inputs.push(
         <Input onInputChange={this.handleOptionTextChange}
           triggerInputEnd={this.triggerInputEnd}
@@ -279,20 +280,21 @@ export default class AdvanceSearchBar extends React.Component {
       );
     }
     inputs.push(
-      <InputOptionListTextField focusChangeHandler={this.changeFocus}
-        value={this.state.searchInputValue}
+      <InputOptionListTextField
+        optionList={optionList}
+        key='search-bar-input-text'
+        refInput={this.setTextInputRef}
         disabled={this.state.showHelper}
+        toggleHelper={this.toggleHelper}
+        triggerSearch={this.triggerSearch}
+        value={this.state.searchInputValue}
+        deleteLastChip={this.deleteLastChip}
+        focusChangeHandler={this.changeFocus}
         onChange={this.handleSearchTextChange}
         onOptionSelect={this.handleOptionSelect}
         selectedOption={this.state.searchIndexSelected}
         changeSearchIndexSelected={this.changeSearchIndexSelected}
-        deleteLastChip={this.deleteLastChip}
-        triggerSearch={this.triggerSearch}
-        toggleHelper={this.toggleHelper}
-        refInput={this.setTextInputRef}
-        key='search-bar-input-text'>
-        { optionList }
-      </InputOptionListTextField>
+      />
     );
 
     if (inputs.length > 1 || this.state.searchInputValue.length >= 1) {
@@ -304,9 +306,9 @@ export default class AdvanceSearchBar extends React.Component {
     return inputs;
   }
 
-  isAllSubOptionsSelected (child) {
+  isAllSubOptionsSelected (option) {
     const { selectedOptions } = this.state;
-    const { options, name } = child.props;
+    const { options, name } = option;
 
     if (!options || !selectedOptions[name]) return false;
 
@@ -314,13 +316,13 @@ export default class AdvanceSearchBar extends React.Component {
   }
 
   getOptionList = () => {
+    const { options } = this.props;
     const { selectedOptions } = this.state;
-    let children = React.Children.toArray(this.props.children);
 
-    return children.filter(child => {
-      const { allowMulti, name } = child.props;
+    return options.filter(option => {
+      const { allowMulti, name } = option;
 
-      return (allowMulti && !this.isAllSubOptionsSelected(child)) || !selectedOptions[name];
+      return (allowMulti && !this.isAllSubOptionsSelected(option)) || !selectedOptions[name];
     });
   }
 
@@ -340,47 +342,56 @@ export default class AdvanceSearchBar extends React.Component {
     }
   }
 
+  renderLabel () {
+    const { labelText } = this.props;
+
+    return labelText &&
+    <label className={`search-bar__label ${this.state.focus ? 'search-bar__label--float' : ''}`}>
+      {this.props.labelText}
+    </label>;
+  }
+
   render () {
+    const { dark } = this.props;
     const searchValid = this.isSearchValid();
     const showHelper = this.showHelper();
     let optionList = this.getOptionList();
+    const currentTags = this.getCurrentTags(optionList);
     let list;
 
     if (this.state.showHelper) {
-      list = <InputOptionListHelper handleOptionSelect={this.handleOptionSelect}
+      list = <InputOptionListHelper
+        handleOptionSelect={this.handleOptionSelect}
         changeSearchIndexSelected={this.changeSearchIndexSelected}
         toggleHelper={this.toggleHelper}
         value={this.state.searchInputValue}
         selectedOption={this.state.searchIndexSelected}
         helperTitleFunction={this.props.helperTitleFunction}
-        helperTextButton={this.props.helperTextButton}>
-        { optionList }
-      </InputOptionListHelper>;
+        helperTextButton={this.props.helperTextButton}
+        optionList={optionList}
+      />;
     } else if (this.state.isSearching) {
       list = <InputOptionList onOptionSelect={this.handleOptionSelect}
         currentSearchingKey={this.state.searchInputValue}
         changeSearchIndexSelected={this.changeSearchIndexSelected}
         selectedOption={this.state.searchIndexSelected}
-        notTagFound={this.props.notTagFound}>
-        { optionList }
-      </InputOptionList>;
+        notTagFound={this.props.notTagFound}
+        optionList={optionList}
+      />;
     }
     return (
-      <div className='search-bar'>
+      <div className={`search-bar${dark ? ' search-bar--dark' : ''}`}>
         <div className={`search-bar__container ${this.state.focus ? 'search-bar__container--focus' : ''}`}>
-          { this.getCurrentTags(optionList) }
+          { currentTags }
+          <button
+            className={`search-bar__button ${searchValid || showHelper ? 'search-bar__button--active' : ''} ${this.state.focus ? 'search-bar__button--active-border' : ''}`}
+            disabled={!searchValid && !showHelper}
+            onClick={() => this.handleSearchButton(showHelper)}
+          >
+            {this.props.buttonText}
+          </button>
+          { currentTags.length <= 1 && this.renderLabel() }
         </div>
-
-        <button
-          className={`search-bar__button ${searchValid || showHelper ? 'search-bar__button--active' : ''} ${this.state.focus ? 'search-bar__button--active-border' : ''}`}
-          disabled={!searchValid && !showHelper}
-          onClick={() => this.handleSearchButton(showHelper)}
-        >
-          {this.props.buttonText}
-        </button>
-
-        { this.props.labelText && <label className={`search-bar__label ${this.state.focus ? 'search-bar__label--float' : ''}`}>{this.props.labelText}</label> }
-
         { list }
       </div>
     );
@@ -388,18 +399,20 @@ export default class AdvanceSearchBar extends React.Component {
 }
 
 AdvanceSearchBar.propTypes = {
-  callback: PropTypes.func.isRequired,
-  emptyCallback: PropTypes.func,
-  helperTitleFunction: PropTypes.func,
-  children: PropTypes.node.isRequired,
-  labelText: PropTypes.string,
+  dark: PropTypes.bool,
+  options: PropTypes.array,
   buttonText: PropTypes.node,
+  labelText: PropTypes.string,
+  emptyCallback: PropTypes.func,
   notTagFound: PropTypes.string,
   helperTextButton: PropTypes.string,
-  separatorComponent: PropTypes.node
+  separatorComponent: PropTypes.node,
+  callback: PropTypes.func.isRequired,
+  helperTitleFunction: PropTypes.func
 };
 
 AdvanceSearchBar.defaultProps = {
+  dar: false,
   buttonText: (
     <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>
       <path d='M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z' />
