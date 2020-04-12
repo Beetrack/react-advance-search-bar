@@ -19,13 +19,13 @@ const App = () => (
     <AdvanceSearchBar
       callback={(params) => { window.alert(`Searching parameters\n${Object.keys(params).reduce((memo, key) => { return memo + `${key}: ${params[key]}\n`; }, '')}`); }}
       emptyCallback={() => { console.log('Empty'); }}
+      initialSearch={{ third_option: 'hello' }}
     >
       <InputOption name='first_option' label='First Option' options={FIRST_OPTIONS} allowMulti />
       <InputOption name='second_option' label='Second Option' allowMulti />
       <InputOption name='third_option' label='Third Option' />
       <InputOption name='fourth_option' label='Fouth Option' />
       <InputOption name='fifth_option' label='Fifth Option' options={SECOND_OPTIONS} />
-
     </AdvanceSearchBar>
   </div>
 );

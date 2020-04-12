@@ -33,7 +33,7 @@ export default class AdvanceSearchBar extends React.Component {
     this.textInputRef = null;
 
     this.state = {
-      focus: false,
+      focus: !!props.initialSearch,
       // Searching
       searchingInput: false,
       searchInputValue: '',
@@ -41,7 +41,7 @@ export default class AdvanceSearchBar extends React.Component {
       // Healper
       showHelper: false,
       // Options
-      selectedOptions: {}
+      selectedOptions: props.initialSearch || {}
     };
   }
 
@@ -51,8 +51,10 @@ export default class AdvanceSearchBar extends React.Component {
 
   // function checking children and setup the only child here
   setOnlyOption () {
-    const { children } = this.props;
-    if (React.Children.count(children) !== 1) return;
+    const { children, initialSearch } = this.props;
+
+    if (React.Children.count(children) !== 1 || initialSearch) return;
+
     const { name, allowMulti } = children.props;
 
     this.setState({
@@ -396,7 +398,8 @@ AdvanceSearchBar.propTypes = {
   buttonText: PropTypes.node,
   notTagFound: PropTypes.string,
   helperTextButton: PropTypes.string,
-  separatorComponent: PropTypes.node
+  separatorComponent: PropTypes.node,
+  initialSearch: PropTypes.object
 };
 
 AdvanceSearchBar.defaultProps = {
